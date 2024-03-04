@@ -61,6 +61,7 @@
 from art import logo
 from random import randint
 from os import system
+import re
 
 
 def dealer_win(user, comp):
@@ -97,12 +98,22 @@ def make_wisdom_decision(cards: list) -> bool:
   return False
 
 
+def take_bet():
+  num_pattern = re.compile(r'^[\d]+$')
+  raw_bet = input('Your bet: $')
+  while re.match(num_pattern, raw_bet) == None or int(raw_bet) < 1:
+    print("The bet must be a positive integer value. Try again")
+    raw_bet = input('Your bet: $')
+  return int(raw_bet)
+
+
 all_cards = []
 comp_state = {'cards': [], 'cash': 1000}
 user_state = {'cards': [], 'cash': 1000}
 play = True
 
 while play and comp_state['cash'] > 0 and user_state['cash'] > 0:
+  system('clear')
   print(logo)
   card = randint(2, 11)
   while all_cards.count(card) > 3:
@@ -140,9 +151,7 @@ while play and comp_state['cash'] > 0 and user_state['cash'] > 0:
       comp_state['cards'].append(card)
   print(f'Your cards: {user_state["cards"]}')
   print(f'Dealer cards: {comp_state["cards"][0]}')
-  bet = int(input('Your bet: $'))
-  while bet <= 0:
-    bet = int(input("You must bet. Bet again: $"))
+  bet = take_bet()
   hit = input('Hit or stand (h/s): ')
   while hit == 'h':
     user_state['cards'].append(randint(2, 11))
@@ -172,8 +181,10 @@ while play and comp_state['cash'] > 0 and user_state['cash'] > 0:
     draft(user_state, comp_state)
   if comp_state['cash'] <= 0:
     user_win(user_state, comp_state)
+    break
   if user_state['cash'] <= 0:
     dealer_win(user_state, comp_state)
+    break
   play = input('Deal? ') == 'y'
   user_state['cards'] = []
   comp_state['cards'] = []
